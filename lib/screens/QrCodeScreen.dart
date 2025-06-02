@@ -1,18 +1,21 @@
-// QrCodeScreen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class QrCodeScreen extends StatelessWidget {
   final String encryptedText;
   final String publicKey;
 
-  const QrCodeScreen({super.key, required this.encryptedText, required this.publicKey});
+  const QrCodeScreen({
+    super.key,
+    required this.encryptedText,
+    required this.publicKey,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // JSON ko'rinishida QRga beramiz
     final String combinedData = jsonEncode({
       'encrypted': encryptedText,
       'publicKey': publicKey,
@@ -20,7 +23,7 @@ class QrCodeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🔐 RSA QR KOD'),
+        title: Text('rsa_qr_title'.tr()),
         centerTitle: true,
         backgroundColor: Colors.black87,
       ),
@@ -31,9 +34,9 @@ class QrCodeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text(
-              '📦 QRga kodlangan JSON maʼlumot:',
-              style: TextStyle(fontSize: 18, color: Colors.white70),
+            Text(
+              'qr_json_info'.tr(),
+              style: const TextStyle(fontSize: 18, color: Colors.white70),
             ),
             const SizedBox(height: 12),
             SelectableText(
@@ -52,11 +55,11 @@ class QrCodeScreen extends StatelessWidget {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: combinedData));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('📋 QR maʼlumot nusxalandi!')),
+                  SnackBar(content: Text('qr_copied_msg'.tr())),
                 );
               },
               icon: const Icon(Icons.copy),
-              label: const Text('QR JSON ni nusxalash'),
+              label: Text('copy_qr_json'.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.greenAccent.shade700,
                 foregroundColor: Colors.black,

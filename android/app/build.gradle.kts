@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.securecrypt_mobile_new_bmi"
-        minSdk = 18 // 🔐 FlutterSecureStorage ishlashi uchun KAMIDA 18 BO‘LSIN
+        minSdk = 21 // ⛳️ Oldingi 18 o‘rniga 21 qo‘ydik — NDK talabiga mos
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

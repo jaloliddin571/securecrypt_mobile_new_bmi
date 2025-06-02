@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/rsa_service.dart';
 
 class ScanQrScreen extends StatefulWidget {
@@ -47,7 +48,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
         final publicKeyPem = parsed['publicKey'];
 
         setState(() {
-          decryptedMessage = '📥 JSON qabul qilindi! (Deshifrlash uchun RSA private key kerak)';
+          decryptedMessage = 'json_received'.tr();
         });
 
         // Bu yerda siz deshifrlashni amalga oshirishingiz mumkin,
@@ -55,7 +56,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
       } catch (e) {
         setState(() {
-          decryptedMessage = '❗ JSON formatni o‘qib bo‘lmadi: $e';
+          decryptedMessage = tr('json_read_error', args: [e.toString()]);
         });
       }
     });
@@ -65,14 +66,14 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QR Kodni Skannerlash'),
+        title: Text('scan_qr_title'.tr()),
         backgroundColor: Colors.black87,
         centerTitle: true,
       ),
-      body: Column(
+      body: ListView(
         children: [
-          Expanded(
-            flex: 3,
+          SizedBox(
+            height: 300,
             child: QRView(
               key: qrKey,
               onQRViewCreated: _onQRViewCreated,
@@ -85,41 +86,40 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              color: Colors.black,
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('📥 Skannerlangan maʼlumot:',
-                      style: TextStyle(color: Colors.white)),
-                  const SizedBox(height: 12),
-                  SelectableText(
-                    scannedData,
-                    style: const TextStyle(color: Colors.white70),
+          Container(
+            color: Colors.black,
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'scanned_data_label'.tr(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 12),
+                SelectableText(
+                  scannedData,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 12),
+                if (decryptedMessage.isNotEmpty)
+                  Text(
+                    decryptedMessage,
+                    style: const TextStyle(color: Colors.greenAccent),
                   ),
-                  const SizedBox(height: 12),
-                  if (decryptedMessage.isNotEmpty)
-                    Text(
-                      decryptedMessage,
-                      style: const TextStyle(color: Colors.greenAccent),
-                    ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: scannedData));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('📋 Nusxalandi!')),
-                      );
-                    },
-                    icon: const Icon(Icons.copy),
-                    label: const Text('Kopiyalash'),
-                  )
-                ],
-              ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: scannedData));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('copied_msg'.tr())),
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: Text('copy_btn'.tr()),
+                )
+              ],
             ),
           ),
         ],

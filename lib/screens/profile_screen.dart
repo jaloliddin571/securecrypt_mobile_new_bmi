@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 import '../services/user_profile.dart';
 import '../services/user_storage.dart';
 import 'edit_profile_screen.dart';
@@ -13,10 +14,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile _user = UserProfile(
-    name: 'Ismingiz',
-    email: 'email@misol.com',
-    phone: '+998 90 123 45 67',
-    address: 'Toshkent, O‘zbekiston',
+    name: 'default_name'.tr(),
+    email: 'default_email'.tr(),
+    phone: 'default_phone'.tr(),
+    address: 'default_address'.tr(),
   );
 
   @override
@@ -75,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       BoxShadow(
                         color: Colors.black45,
                         blurRadius: 10,
-                        offset: Offset(0, 4),
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -83,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: 55,
                     backgroundImage: _user.imagePath != null
                         ? FileImage(File(_user.imagePath!))
-                        : const AssetImage('assets/images/avatar.png') as ImageProvider,
+                        : const AssetImage('assets/icon/icon.png') as ImageProvider,
                     backgroundColor: Colors.white10,
                   ),
                 ),
@@ -124,9 +125,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  _buildInfoCard(Icons.phone, 'Telefon raqam', _user.phone),
-                  _buildInfoCard(Icons.location_on, 'Manzil', _user.address),
-                  _buildInfoCard(Icons.info_outline, 'Status', 'Faol foydalanuvchi'),
+                  _buildInfoCard(Icons.phone, 'phone'.tr(), _user.phone),
+                  _buildInfoCard(Icons.location_on, 'address'.tr(), _user.address),
+                  _buildInfoCard(Icons.info_outline, 'status'.tr(), 'active_user'.tr()),
                 ],
               ),
             ),
@@ -139,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.pop(context);
                 },
                 icon: const Icon(Icons.logout),
-                label: const Text('Chiqish'),
+                label: Text('logout'.tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,

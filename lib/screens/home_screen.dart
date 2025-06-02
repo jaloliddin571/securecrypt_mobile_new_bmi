@@ -1,9 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:securecrypt_mobile_new_bmi/rsa_screens/EncryptScreen.dart';
+import 'package:securecrypt_mobile_new_bmi/rsa_screens/decrypt_screen.dart';
 import 'package:securecrypt_mobile_new_bmi/screens/FileDecryptionScreen.dart';
 import 'package:securecrypt_mobile_new_bmi/screens/profile_screen.dart';
 import 'package:securecrypt_mobile_new_bmi/screens/scan_qr_screen.dart';
 import 'package:securecrypt_mobile_new_bmi/screens/settings_screen.dart';
+import '../rsa_screens/key_screen.dart';
 import '../steganografiya/SteganographyScreen.dart';
 import 'AboutScreen.dart';
 import 'AppDrawer.dart';
@@ -35,6 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUser();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {}); // Locale o'zgarganda UI yangilansin
+  }
+
   Future<void> _loadUser() async {
     final profile = await UserStorage.loadUser();
     if (profile != null) {
@@ -52,9 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          '🔐 SecureCrypt',
-          style: TextStyle(
+        title: Text(
+          'securecrypt_title'.tr(),  // 🔐 SecureCrypt
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,
             color: Colors.white,
@@ -77,16 +87,66 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSpacing: 20,
           crossAxisSpacing: 20,
           children: [
-            _HomeButton(icon: Icons.lock, label: 'Matnni\nShifrlash', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EncryptScreen()))),
-            _HomeButton(icon: Icons.lock_open, label: 'Matnni\nDeshifrlash', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DecryptScreen()))),
-            _HomeButton(icon: Icons.file_upload_outlined, label: 'Faylni\nShifrlash', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FileEncryptScreen()))),
-            _HomeButton(icon: Icons.file_download_outlined, label: 'Faylni\nDeshifrlash', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FileDecryptScreen()))),
-            _HomeButton(icon: Icons.image_search, label: 'Steganografiya', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SteganographyScreen()))),
-            _HomeButton(icon: Icons.qr_code_2, label: 'QR Kod\nSkaner', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanQrScreen()))),
-            _HomeButton(icon: Icons.person_outline, label: 'Profil\nMaʼlumot', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()))),
-            _HomeButton(icon: Icons.info_outline, label: 'Ilova\nHaqida', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()))),
-            _HomeButton(icon: Icons.settings, label: 'Sozlamalar', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen()))),
-            _HomeButton(icon: Icons.bar_chart, label: 'Statistika', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatisticsScreen()))),
+            _HomeButton(
+              icon: Icons.lock,
+              label: 'encrypt'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EncryptScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.lock_open,
+              label: 'decrypt'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DecryptScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.vpn_key,
+              label: 'rsa_keys'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const KeyScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.image_search,
+              label: 'steganography'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SteganographyScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.lock_outline,
+              label: 'rsa_encryption'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EncryptScreenRSA())),
+            ),
+            _HomeButton(
+              icon: Icons.lock_clock,
+              label: 'rsa_decryption'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DecryptScreenRSA())),
+            ),
+            _HomeButton(
+              icon: Icons.file_upload_outlined,
+              label: 'file_encrypt'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FileEncryptScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.file_download_outlined,
+              label: 'file_decrypt'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FileDecryptScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.settings,
+              label: 'settings'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.bar_chart,
+              label: 'statistics'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatisticsScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.person_outline,
+              label: 'profile_information'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())),
+            ),
+            _HomeButton(
+              icon: Icons.info_outline,
+              label: 'about'.tr(),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen())),
+            ),
           ],
         ),
       ),
@@ -113,7 +173,7 @@ class _HomeButtonState extends State<_HomeButton> {
   double _scale = 1.0;
 
   void _onTapDown(TapDownDetails details) {
-    HapticFeedback.lightImpact(); // ✅ Tugma bosilganda vibratsiya
+    HapticFeedback.lightImpact(); // Tugma bosilganda vibratsiya
     setState(() {
       _scale = 0.95;
     });

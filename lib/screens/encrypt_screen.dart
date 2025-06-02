@@ -1,12 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pointycastle/asymmetric/api.dart';
-
-import '../services/aes_service.dart';
 import '../services/caesar_service.dart';
-import '../services/rsa_service.dart';
 import '../services/vigenere_service.dart';
-import '../services/stats_service.dart'; // 📊 Statistika servisini import qildik
+import '../services/aes_service.dart';
+import '../services/stats_service.dart'; // 📊 Statistika servisi
 
 class EncryptScreen extends StatefulWidget {
   const EncryptScreen({super.key});
@@ -21,10 +19,8 @@ class _EncryptScreenState extends State<EncryptScreen> {
 
   String? _selectedAlgorithm;
   String _resultText = '';
-  String _publicKeyPEM = '';
-  String _privateKeyPEM = '';
 
-  final List<String> _algorithms = ['Caesar', 'Vigenère', 'AES', 'RSA'];
+  final List<String> _algorithms = ['Caesar', 'Vigenère', 'AES'];
 
   void _encrypt() async {
     final text = _inputController.text.trim();
@@ -32,71 +28,45 @@ class _EncryptScreenState extends State<EncryptScreen> {
 
     if (_selectedAlgorithm == null || text.isEmpty) {
       setState(() {
-        _resultText = '❗ Iltimos, matn va algoritmni tanlang.';
-        _publicKeyPEM = '';
-        _privateKeyPEM = '';
+        _resultText = tr('please_select_algorithm_and_text'); // '❗ Iltimos, matn va algoritmni tanlang.'
       });
       return;
     }
 
     try {
       String output = '';
-      String publicKey = '';
-      String privateKey = '';
 
       switch (_selectedAlgorithm) {
         case 'Caesar':
           if (key.isEmpty || int.tryParse(key) == null) {
-            output = '❗ Caesar uchun raqamli kalit kiriting.';
+            output = tr('enter_numeric_key_caesar'); // '❗ Caesar uchun raqamli kalit kiriting.'
           } else {
             final shift = int.parse(key);
             output = CaesarCipher.encrypt(text, shift);
-            await StatsService.increment('caesar_count'); // 📊
+            await StatsService.increment('caesar_count');
           }
           break;
 
         case 'Vigenère':
           if (key.isEmpty) {
-            output = '❗ Vigenère uchun matnli kalit kiriting.';
+            output = tr('enter_text_key_vigenere'); // '❗ Vigenère uchun matnli kalit kiriting.'
           } else {
             output = VigenereCipher.encrypt(text, key);
-            await StatsService.increment('vigenere_count'); // 📊
+            await StatsService.increment('vigenere_count');
           }
           break;
 
         case 'AES':
           if (key.isEmpty) {
-            output = '❗ AES uchun matnli kalit kiriting.';
+            output = tr('enter_text_key_aes'); // '❗ AES uchun matnli kalit kiriting.'
           } else {
             output = AESCipher.encrypt(text, key);
-            await StatsService.increment('aes_count'); // 📊
+            await StatsService.increment('aes_count');
           }
-          break;
-
-        case 'RSA':
-          RSAPublicKey publicKeyObj;
-          if (key.isEmpty) {
-            final keyPair = await RSAService.generateKeyPair();
-            publicKeyObj = keyPair.publicKey;
-            publicKey = RSAService.encodePublicKeyToPem(publicKeyObj);
-            privateKey = RSAService.encodePrivateKeyToPem(keyPair.privateKey);
-            output = RSAService.encrypt(text, publicKeyObj);
-          } else {
-            publicKeyObj = RSAService.parsePublicKeyFromPem(key);
-            final keyPair = await RSAService.generateKeyPair();
-            privateKey = RSAService.encodePrivateKeyToPem(keyPair.privateKey);
-            publicKey = key;
-            output = RSAService.encrypt(text, publicKeyObj);
-          }
-          await StatsService.increment('rsa_count'); // 📊
-          setState(() {
-            _publicKeyPEM = publicKey;
-            _privateKeyPEM = privateKey;
-          });
           break;
 
         default:
-          output = '🔒 Bu algoritm hali qo‘llab-quvvatlanmaydi';
+          output = tr('algorithm_not_supported'); // '🔒 Bu algoritm hali qo‘llab-quvvatlanmaydi'
       }
 
       setState(() {
@@ -104,9 +74,7 @@ class _EncryptScreenState extends State<EncryptScreen> {
       });
     } catch (e) {
       setState(() {
-        _resultText = '⚠️ Xatolik: ${e.toString()}';
-        _publicKeyPEM = '';
-        _privateKeyPEM = '';
+        _resultText = '${tr('error_occurred')} ${e.toString()}'; // '⚠️ Xatolik: ...'
       });
     }
   }
@@ -115,7 +83,7 @@ class _EncryptScreenState extends State<EncryptScreen> {
     if (text.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: text));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ $label nusxalandi!')),
+        SnackBar(content: Text('${tr('copied')} $label ${tr('to_clipboard')}')), // '✅ $label nusxalandi!'
       );
     }
   }
@@ -125,9 +93,9 @@ class _EncryptScreenState extends State<EncryptScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
-          '🔐 Matnni Shifrlash',
-          style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+        title: Text(
+          tr('encrypt_text_title'), // '🔐 Matnni Shifrlash'
+          style: const TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -160,7 +128,7 @@ class _EncryptScreenState extends State<EncryptScreen> {
                   controller: _inputController,
                   maxLines: 4,
                   style: const TextStyle(color: Colors.white),
-                  decoration: _inputStyle('💬 Shifrlanadigan matn'),
+                  decoration: _inputStyle(tr('input_text_hint')), // '💬 Shifrlanadigan matn'
                 ),
               ),
               const SizedBox(height: 16),
@@ -171,7 +139,7 @@ class _EncryptScreenState extends State<EncryptScreen> {
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.tealAccent),
                   decoration: InputDecoration(
-                    labelText: '📌 Shifrlash algoritmi',
+                    labelText: tr('select_algorithm'), // '📌 Shifrlash algoritmi'
                     labelStyle: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w500),
                     enabledBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.tealAccent),
@@ -194,11 +162,8 @@ class _EncryptScreenState extends State<EncryptScreen> {
                         icon = Icons.vpn_key;
                         break;
                       case 'AES':
-                        icon = Icons.shield;
-                        break;
-                      case 'RSA':
                       default:
-                        icon = Icons.lock_outline;
+                        icon = Icons.shield;
                     }
 
                     return DropdownMenuItem(
@@ -218,15 +183,26 @@ class _EncryptScreenState extends State<EncryptScreen> {
               if (_selectedAlgorithm != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: _buildCard(
-                    child: TextField(
-                      controller: _keyController,
-                      maxLines: _selectedAlgorithm == 'RSA' ? 8 : 1,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: _inputStyle(_selectedAlgorithm == 'RSA'
-                          ? '🔑 RSA Public Key (PEM formatda)'
-                          : '🗝 Kalit (key)'),
-                    ),
+                  child: Column(
+                    children: [
+                      _buildCard(
+                        child: TextField(
+                          controller: _keyController,
+                          maxLines: 1,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputStyle(tr('key_hint')), // '🗝 Kalit (key)'
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => _copyToClipboard(_keyController.text.trim(), tr('key')), // 'Kalit'
+                          icon: const Icon(Icons.copy, color: Colors.white),
+                          label: Text(tr('copy_key')), // 'Kalitni nusxalash'
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               const SizedBox(height: 24),
@@ -235,9 +211,9 @@ class _EncryptScreenState extends State<EncryptScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _encrypt,
                   icon: const Icon(Icons.lock, color: Colors.black),
-                  label: const Text(
-                    'Shifrlash',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+                  label: Text(
+                    tr('encrypt_button'), // 'Shifrlash'
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -253,57 +229,19 @@ class _EncryptScreenState extends State<EncryptScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('📄 Shifrlangan matn:',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(tr('encrypted_text_label'), // '📄 Shifrlangan matn:'
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       SelectableText(_resultText,
                           style: const TextStyle(fontSize: 16, color: Color(0xFF00FFAB))),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
-                          onPressed: () => _copyToClipboard(_resultText, 'Shifrlangan matn'),
+                          onPressed: () => _copyToClipboard(_resultText, tr('encrypted_text_label')), // 'Shifrlangan matn'
                           icon: const Icon(Icons.copy, color: Colors.white),
-                          label: const Text('Kopiyalash', style: TextStyle(color: Colors.white)),
+                          label: Text(tr('copy')), // 'Kopiyalash'
                         ),
                       ),
-                      if (_publicKeyPEM.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('🔓 RSA Public Key:',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.tealAccent)),
-                            const SizedBox(height: 6),
-                            SelectableText(_publicKeyPEM,
-                                style: const TextStyle(fontSize: 14, color: Colors.white70)),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
-                                onPressed: () => _copyToClipboard(_publicKeyPEM, 'RSA Public Key'),
-                                icon: const Icon(Icons.copy, color: Colors.white),
-                                label: const Text('Kopiyalash', style: TextStyle(color: Colors.white)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      if (_privateKeyPEM.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('🔐 RSA Private Key:',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.redAccent)),
-                            const SizedBox(height: 6),
-                            SelectableText(_privateKeyPEM,
-                                style: const TextStyle(fontSize: 14, color: Colors.white70)),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
-                                onPressed: () => _copyToClipboard(_privateKeyPEM, 'RSA Private Key'),
-                                icon: const Icon(Icons.copy, color: Colors.white),
-                                label: const Text('Kopiyalash', style: TextStyle(color: Colors.white)),
-                              ),
-                            ),
-                          ],
-                        ),
                     ],
                   ),
                 ),

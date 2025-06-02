@@ -1,13 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:convert';
+
+import 'package:collection/collection.dart';
+import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // <-- Clipboard uchun
 import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
-import '../services/stats_service.dart'; // 📊 Statistika
+import 'package:easy_localization/easy_localization.dart';
 
 class FileDecryptScreen extends StatefulWidget {
   const FileDecryptScreen({super.key});
@@ -17,10 +21,11 @@ class FileDecryptScreen extends StatefulWidget {
 }
 
 class _FileDecryptScreenState extends State<FileDecryptScreen> {
-  final _key = encrypt.Key.fromUtf8('my32lengthsupersecretnooneknows1');
   String? _status;
   String? _fileName;
-  String? _decryptedPath;
+  String? _savedPath;
+  String _userKey = '';
+  bool _obscureKey = true;
 
   @override
   void initState() {
@@ -33,64 +38,79 @@ class _FileDecryptScreenState extends State<FileDecryptScreen> {
     await Permission.manageExternalStorage.request();
   }
 
+  Uint8List _generateKey(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return Uint8List.fromList(digest.bytes);
+  }
+
   Future<void> _pickAndDecryptFile() async {
     try {
+      if (_userKey.isEmpty || _userKey.length < 4) {
+        setState(() => _status = 'error_key_length'.tr());
+        return;
+      }
+
       final file = await openFile(
         acceptedTypeGroups: [
-          XTypeGroup(label: 'Encrypted Files', extensions: ['enc'])
+          XTypeGroup(label: 'Encrypted files', extensions: ['enc']),
         ],
       );
 
       if (file == null) {
         setState(() {
-          _status = '❗ Fayl tanlanmadi.';
+          _status = 'error_no_file'.tr();
           _fileName = null;
-          _decryptedPath = null;
         });
         return;
       }
 
-      final allBytes = await file.readAsBytes();
-      if (allBytes.length < 20) {
-        setState(() => _status = '❌ Noto‘g‘ri fayl formati.');
+      final fileBytes = await file.readAsBytes();
+      final keyBytes = _generateKey(_userKey);
+
+      final iv = encrypt.IV(fileBytes.sublist(0, 16));
+      final encryptedContent = fileBytes.sublist(16, fileBytes.length - 10 - 32);
+      final extensionBytes = fileBytes.sublist(fileBytes.length - 42, fileBytes.length - 32);
+      final originalExtension = utf8.decode(extensionBytes.where((e) => e != 0).toList());
+
+      final keyHash = fileBytes.sublist(fileBytes.length - 32);
+      final providedKeyHash = sha256.convert(keyBytes).bytes;
+
+      if (!const ListEquality().equals(keyHash, providedKeyHash)) {
+        setState(() => _status = 'error_wrong_key'.tr());
         return;
       }
 
-      final iv = encrypt.IV(allBytes.sublist(0, 16));
-      final extensionBytes = allBytes.sublist(allBytes.length - 10);
-      final encryptedData = allBytes.sublist(16, allBytes.length - 10);
-
-      final encrypter = encrypt.Encrypter(encrypt.AES(_key));
-      final decryptedBytes = encrypter.decryptBytes(
-        encrypt.Encrypted(encryptedData),
+      final key = encrypt.Key(keyBytes);
+      final encrypter = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
+      final decrypted = encrypter.decryptBytes(
+        encrypt.Encrypted(encryptedContent),
         iv: iv,
       );
 
-      final extension = String.fromCharCodes(extensionBytes).replaceAll('\u0000', '').trim();
-      final baseName = path.basenameWithoutExtension(file.path);
-      final fileName = '$baseName.$extension';
-
+      final decryptedFileName = path.basenameWithoutExtension(file.name);
       final directory = Directory('/storage/emulated/0/Download');
-      final decryptedPath = path.join(directory.path, fileName);
+      final decryptedPath = path.join(directory.path, '$decryptedFileName.$originalExtension');
       final outFile = File(decryptedPath);
-      await outFile.writeAsBytes(decryptedBytes);
-
-      // 📊 Statistikani oshirish
-      await StatsService.increment('file_dec_count');
+      await outFile.writeAsBytes(decrypted);
 
       setState(() {
-        _status = '✅ Fayl saqlandi: $decryptedPath';
-        _fileName = fileName;
-        _decryptedPath = decryptedPath;
+        _status = 'success_decrypted'.tr(args: [decryptedPath]);
+        _fileName = '$decryptedFileName.$originalExtension';
+        _savedPath = decryptedPath;
       });
     } catch (e) {
-      setState(() => _status = '❌ Xatolik: $e');
+      setState(() => _status = 'error_decrypt_failed'.tr(args: [e.toString()]));
     }
   }
 
-  void _shareDecryptedFile() {
-    if (_decryptedPath != null && File(_decryptedPath!).existsSync()) {
-      Share.shareXFiles([XFile(_decryptedPath!)], text: '🔓 Deshifrlangan fayl: $_fileName');
+  Future<void> _shareDecryptedFile() async {
+    if (_savedPath != null) {
+      try {
+        await Share.shareXFiles([XFile(_savedPath!)], text: 'share_decrypted_file_text'.tr());
+      } catch (e) {
+        setState(() => _status = 'error_share_failed'.tr(args: [e.toString()]));
+      }
     }
   }
 
@@ -99,7 +119,7 @@ class _FileDecryptScreenState extends State<FileDecryptScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('🔓 Faylni deshifrlash'),
+        title: Text('title_file_decrypt'.tr()),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -124,30 +144,53 @@ class _FileDecryptScreenState extends State<FileDecryptScreen> {
         ),
         padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            TextField(
+              obscureText: _obscureKey,
+              onChanged: (val) => _userKey = val,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'hint_enter_key'.tr(),
+                hintStyle: const TextStyle(color: Colors.white54),
+                filled: true,
+                fillColor: Colors.white12,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureKey ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureKey = !_obscureKey;
+                    });
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _pickAndDecryptFile,
-              icon: const Icon(Icons.lock_open),
-              label: const Text('Faylni tanlash va deshifrlash'),
+              icon: const Icon(Icons.lock_open, size: 24),
+              label: Text('btn_decrypt_file'.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00FFAB),
                 foregroundColor: Colors.black,
                 minimumSize: const Size.fromHeight(55),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 6,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             if (_fileName != null)
               Card(
                 color: const Color(0xFF2E2E2E),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 4,
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      const Icon(Icons.insert_drive_file, color: Colors.tealAccent),
+                      const Icon(Icons.insert_drive_file, color: Colors.amber),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -156,13 +199,20 @@ class _FileDecryptScreenState extends State<FileDecryptScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.share, color: Colors.tealAccent),
-                        onPressed: _shareDecryptedFile,
-                        tooltip: 'Ulashish',
-                      ),
                     ],
                   ),
+                ),
+              ),
+            if (_savedPath != null)
+              ElevatedButton.icon(
+                onPressed: _shareDecryptedFile,
+                icon: const Icon(Icons.share),
+                label: Text('btn_share'.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber[700],
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             if (_status != null) ...[
@@ -173,13 +223,6 @@ class _FileDecryptScreenState extends State<FileDecryptScreen> {
                 decoration: BoxDecoration(
                   color: _status!.startsWith('✅') ? Colors.green[600] : Colors.red[700],
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      offset: const Offset(2, 4),
-                      blurRadius: 8,
-                    )
-                  ],
                 ),
                 child: Text(
                   _status!,

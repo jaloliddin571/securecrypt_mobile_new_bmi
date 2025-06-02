@@ -1,23 +1,32 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';  // Qo'shildi
 import 'package:securecrypt_mobile_new_bmi/screens/auth_gate.dart';
-import 'package:securecrypt_mobile_new_bmi/screens/welcome_screen.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  runApp(EasyLocalization(
-    supportedLocales: const [Locale('en'), Locale('ru'), Locale('uz')],
-    path: 'assets/translations', // JSON fayllar shu papkada bo'ladi
-    fallbackLocale: const Locale('en'),
-    child: const MyApp(),
-  ),);
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('ru'), Locale('uz')],
+      path: 'assets/translations', // JSON fayllar shu papkada bo'ladi
+      fallbackLocale: const Locale('uz'),
+      child: Phoenix(      // Phoenix bilan o'rab olindi
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

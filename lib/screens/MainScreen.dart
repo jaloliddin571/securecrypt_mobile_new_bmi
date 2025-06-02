@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'home_screen.dart';
@@ -14,41 +15,41 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget>
-  _screens = const [
+  final List<Widget> _screens = const [
     HomeScreen(),
     ScanQrScreen(),
     ProfileScreen(),
   ];
 
-  final List<BottomNavigationBarItem> _navItems = const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home_outlined),
-      activeIcon: Icon(Icons.home),
-      label: 'Bosh sahifa',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.qr_code_scanner_outlined),
-      activeIcon: Icon(Icons.qr_code_scanner),
-      label: 'QR skan',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person_outline),
-      activeIcon: Icon(Icons.person),
-      label: 'Profil',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<BottomNavigationBarItem> _navItems = [
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.home_outlined),
+        activeIcon: const Icon(Icons.home),
+        label: 'home'.tr(),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.qr_code_scanner_outlined),
+        activeIcon: const Icon(Icons.qr_code_scanner),
+        label: 'qr_code'.tr(),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.person_outline),
+        activeIcon: const Icon(Icons.person),
+        label: 'profile'.tr(),
+      ),
+    ];
+
     return Scaffold(
       body: PageTransitionSwitcher(
         duration: const Duration(milliseconds: 300),
-        transitionBuilder: (child, animation, secondaryAnimation) => FadeThroughTransition(
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
-          child: child,
-        ),
+        transitionBuilder: (child, animation, secondaryAnimation) =>
+            FadeThroughTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            ),
         child: _screens[_currentIndex],
       ),
       bottomNavigationBar: Container(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:securecrypt_mobile_new_bmi/services/biometric_service.dart';
 import 'MainScreen.dart';
-import 'PinCodeScreen.dart'; // 👉 PIN sahifani import qiling
+import 'PinCodeScreen.dart';
+import 'CreatePinScreen.dart'; // PIN o‘rnatish sahifasi
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -16,10 +18,23 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    _authenticate();
+    _handleAuthFlow();
   }
 
-  void _authenticate() async {
+  Future<void> _handleAuthFlow() async {
+    const storage = FlutterSecureStorage();
+    final savedPin = await storage.read(key: 'user_pin');
+
+    // Agar PIN o‘rnatilmagan bo‘lsa — yangi PIN o‘rnatish sahifasiga yo‘naltiramiz
+    if (savedPin == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const CreatePinScreen()),
+      );
+      return;
+    }
+
+    // PIN bor — biometrik autentifikatsiya qilishga urinib ko‘ramiz
     final biometricService = BiometricService();
     final isAuth = await biometricService.authenticate();
 
@@ -31,27 +46,16 @@ class _AuthGateState extends State<AuthGate> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const PinCodeScreen()), // 👉 PIN sahifaga o‘tish
+        MaterialPageRoute(builder: (_) => const PinCodeScreen()),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0f0f0f), Color(0xFF1a1a1a)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: _authenticating
-              ? const CircularProgressIndicator(color: Color(0xFF00FFAB))
-              : const SizedBox(), // bu holda user PIN ekraniga o'tadi
-        ),
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(color: Color(0xFF00FFAB)),
       ),
     );
   }

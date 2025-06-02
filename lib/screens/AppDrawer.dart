@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:securecrypt_mobile_new_bmi/screens/AboutScreen.dart';
 import 'package:securecrypt_mobile_new_bmi/screens/settings_screen.dart';
@@ -44,7 +45,7 @@ class AppDrawer extends StatelessWidget {
                     radius: 42,
                     backgroundImage: user.imagePath != null
                         ? FileImage(File(user.imagePath!))
-                        : const AssetImage('assets/images/avatar.png') as ImageProvider,
+                        : const AssetImage('assets/icon/icon.png') as ImageProvider,
                   ),
                   const SizedBox(width: 20),
                   Expanded(
@@ -85,19 +86,19 @@ class AppDrawer extends StatelessWidget {
                   _buildTile(
                     context,
                     icon: Icons.language,
-                    label: '🌐 Tilni tanlash',
+                    label: '${'choose_language'.tr()}',
                     onTap: () => _showLanguageSelector(context),
                   ),
                   _buildTile(
                     context,
                     icon: Icons.info_outline,
-                    label: 'ℹ️ Ilova haqida',
+                    label: '${'about'.tr()}',
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen())),
                   ),
                   _buildTile(
                     context,
                     icon: Icons.settings,
-                    label: '⚙️ Sozlamalar',
+                    label: '${'settings'.tr()}',
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
                   ),
                   const SizedBox(height: 12),
@@ -111,7 +112,7 @@ class AppDrawer extends StatelessWidget {
                   _buildTile(
                     context,
                     icon: Icons.logout,
-                    label: '🚪 Hisobdan chiqish',
+                    label: 'logout'.tr(),
                     color: Colors.redAccent,
                     onTap: () {
                       showDialog(
@@ -268,6 +269,7 @@ class AppDrawer extends StatelessWidget {
               leading: const Text("🇺🇿", style: TextStyle(fontSize: 20)),
               title: const Text('O‘zbek tili', style: TextStyle(color: Colors.white)),
               onTap: () {
+                context.setLocale(const Locale('uz'));
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Til o‘zgartirildi: O‘zbek tili")),
@@ -278,6 +280,7 @@ class AppDrawer extends StatelessWidget {
               leading: const Text("🇬🇧", style: TextStyle(fontSize: 20)),
               title: const Text('English', style: TextStyle(color: Colors.white)),
               onTap: () {
+                context.setLocale(const Locale('en'));
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Language changed: English")),
@@ -288,6 +291,7 @@ class AppDrawer extends StatelessWidget {
               leading: const Text("🇷🇺", style: TextStyle(fontSize: 20)),
               title: const Text('Русский', style: TextStyle(color: Colors.white)),
               onTap: () {
+                context.setLocale(const Locale('ru'));
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Язык изменён: Русский")),

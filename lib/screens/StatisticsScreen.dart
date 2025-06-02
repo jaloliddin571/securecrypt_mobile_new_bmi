@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -54,8 +55,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
     await _loadStats();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('📉 Barcha statistikalar tozalandi.'),
+      SnackBar(
+        content: Text(tr('stats_reset_message')),
         backgroundColor: Colors.redAccent,
       ),
     );
@@ -65,14 +66,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('📊 Statistika', style: TextStyle(color: Colors.black)),
+        title: Text(tr('statistics_title'), style: const TextStyle(color: Colors.black)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadStats),
-          IconButton(icon: const Icon(Icons.delete_forever), onPressed: _resetStats),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadStats, tooltip: tr('refresh')),
+          IconButton(icon: const Icon(Icons.delete_forever), onPressed: _resetStats, tooltip: tr('reset')),
         ],
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -96,7 +97,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   child: ListTile(
                     leading: const Icon(Icons.analytics_outlined, color: Colors.tealAccent),
-                    title: Text(entry.key,
+                    title: Text(tr('stat_key_${entry.key.toLowerCase().replaceAll(' ', '_')}'),
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                     trailing: Text('${entry.value}',
                         style: const TextStyle(color: Colors.tealAccent, fontSize: 18)),
@@ -130,7 +131,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         if (index >= 0 && index < stats.keys.length) {
                           return Transform.rotate(
                             angle: -0.7,
-                            child: Text(stats.keys.elementAt(index), style: const TextStyle(fontSize: 10)),
+                            child: Text(
+                              tr('stat_key_${stats.keys.elementAt(index).toLowerCase().replaceAll(' ', '_')}'),
+                              style: const TextStyle(fontSize: 10),
+                            ),
                           );
                         }
                         return const SizedBox.shrink();

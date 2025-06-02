@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -11,7 +12,7 @@ class AboutScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFF00FFAB)),
-        title: const Text('ℹ️ Ilova haqida', style: TextStyle(color: Colors.white)),
+        title: Text('about_app_title'.tr(), style: const TextStyle(color: Colors.white)), // ℹ️ Ilova haqida
         centerTitle: true,
       ),
       body: Padding(
@@ -19,46 +20,46 @@ class AboutScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                '🔐 SecureCrypt Mobile',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF00FFAB)),
+                'app_name'.tr(), // 🔐 SecureCrypt Mobile
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF00FFAB)),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
-                'SecureCrypt Mobile — bu zamonaviy, xavfsiz va qulay mobil ilova bo‘lib, foydalanuvchilarga matn, fayl va multimedia maʼlumotlarini ishonchli tarzda shifrlash va yashirish imkonini beradi.',
-                style: TextStyle(color: Colors.white70, fontSize: 15),
+                'app_description'.tr(),
+                style: const TextStyle(color: Colors.white70, fontSize: 15),
               ),
-              SizedBox(height: 20),
-              Text('🧩 Asosiy imkoniyatlar:', style: TextStyle(color: Colors.white, fontSize: 16)),
-              SizedBox(height: 10),
-              Text('• Matnni shifrlash/deshifrlash (AES, RSA, Vigenère, Caesar)', style: TextStyle(color: Colors.white70)),
-              Text('• Har qanday faylni (PDF, DOCX, ZIP, MP3, MP4, JPG, PNG, RAR va h.k.) shifrlash/deshifrlash (AES)', style: TextStyle(color: Colors.white70)),
-              Text('• Rasm ichiga maxfiy matnni yashirish va uni ajratib olish (Steganografiya, LSB)', style: TextStyle(color: Colors.white70)),
-              Text('• QR kod orqali shifrlangan maʼlumotni ulashish', style: TextStyle(color: Colors.white70)),
-              Text('• Biometrik autentifikatsiya (Face ID / Fingerprint)', style: TextStyle(color: Colors.white70)),
-              Text('• Clipboard (nusxalash/joylashtirish) va fayl ulashish funksiyasi', style: TextStyle(color: Colors.white70)),
-              Text('• Matnli interfeys, statistika, profil maʼlumotlarini boshqarish', style: TextStyle(color: Colors.white70)),
-              SizedBox(height: 24),
-              Text('📁 Qo‘llab-quvvatlanadigan fayl formatlari:', style: TextStyle(color: Colors.white, fontSize: 16)),
-              SizedBox(height: 8),
-              Text('• Matn: .txt, .json, .csv', style: TextStyle(color: Colors.white70)),
-              Text('• Hujjatlar: .pdf, .docx, .pptx, .xls', style: TextStyle(color: Colors.white70)),
-              Text('• Media: .jpg, .png, .mp3, .mp4, .wav, .avi', style: TextStyle(color: Colors.white70)),
-              Text('• Arxivlar: .zip, .rar, .7z', style: TextStyle(color: Colors.white70)),
-              Text('• Maxsus: .enc (ilovada yaratilgan shifrlangan fayl)', style: TextStyle(color: Colors.white70)),
-              SizedBox(height: 24),
-              Text('🛠 Texnologiyalar:', style: TextStyle(color: Colors.white, fontSize: 16)),
-              SizedBox(height: 8),
-              Text('• Dasturlash tili: Dart (Flutter SDK)', style: TextStyle(color: Colors.white70)),
-              Text('• Shifrlash: pointycastle, basic_utils', style: TextStyle(color: Colors.white70)),
-              Text('• Fayl tanlash: file_selector', style: TextStyle(color: Colors.white70)),
-              Text('• Biometrika: local_auth', style: TextStyle(color: Colors.white70)),
-              Text('• Ulashish: share_plus', style: TextStyle(color: Colors.white70)),
-              SizedBox(height: 24),
-              Text('📱 Ilova versiyasi: 1.0.0', style: TextStyle(color: Colors.white54)),
-              Text('👨‍💻 Dasturchi: Bobomurodov Jaloliddin', style: TextStyle(color: Colors.white54)),
-              Text('📅 Sana: 2025', style: TextStyle(color: Colors.white54)),
+              const SizedBox(height: 20),
+              Text('main_features_title'.tr(), style: const TextStyle(color: Colors.white, fontSize: 16)), // 🧩 Asosiy imkoniyatlar:
+              const SizedBox(height: 10),
+              Text('feature_1'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('feature_2'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('feature_3'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('feature_4'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('feature_5'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('feature_6'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('feature_7'.tr(), style: const TextStyle(color: Colors.white70)),
+              const SizedBox(height: 24),
+              Text('supported_formats_title'.tr(), style: const TextStyle(color: Colors.white, fontSize: 16)), // 📁 Qo‘llab-quvvatlanadigan fayl formatlari:
+              const SizedBox(height: 8),
+              Text('format_text'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('format_docs'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('format_media'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('format_archives'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('format_special'.tr(), style: const TextStyle(color: Colors.white70)),
+              const SizedBox(height: 24),
+              Text('technologies_title'.tr(), style: const TextStyle(color: Colors.white, fontSize: 16)), // 🛠 Texnologiyalar:
+              const SizedBox(height: 8),
+              Text('tech_1'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('tech_2'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('tech_3'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('tech_4'.tr(), style: const TextStyle(color: Colors.white70)),
+              Text('tech_5'.tr(), style: const TextStyle(color: Colors.white70)),
+              const SizedBox(height: 24),
+              Text('app_version'.tr(), style: const TextStyle(color: Colors.white54)),
+              Text('developer'.tr(), style: const TextStyle(color: Colors.white54)),
+              Text('release_year'.tr(), style: const TextStyle(color: Colors.white54)),
             ],
           ),
         ),

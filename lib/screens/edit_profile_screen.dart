@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/user_profile.dart';
 import '../services/user_storage.dart';
 
@@ -69,7 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('✏️ Profilni tahrirlash'),
+        title: Text('edit_profile_title'.tr()), // ✏️ Profilni tahrirlash
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -109,15 +110,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-              _buildTextField(_nameController, 'Ism', 'Ismingiz'),
-              _buildTextField(_emailController, 'Email', 'email@misol.com'),
-              _buildTextField(_phoneController, 'Telefon raqam', '+998 90 123 45 67'),
-              _buildTextField(_addressController, 'Manzil', 'Toshkent shahri'),
+              _buildTextField(_nameController, 'name_label'.tr(), 'name_hint'.tr()),
+              _buildTextField(_emailController, 'email_label'.tr(), 'email_hint'.tr()),
+              _buildTextField(_phoneController, 'phone_label'.tr(), 'phone_hint'.tr()),
+              _buildTextField(_addressController, 'address_label'.tr(), 'address_hint'.tr()),
               const SizedBox(height: 40),
               ElevatedButton.icon(
                 onPressed: _saveProfile,
                 icon: const Icon(Icons.save),
-                label: const Text('Saqlash'),
+                label: Text('save'.tr()),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(55),
                   backgroundColor: const Color(0xFF00C853),

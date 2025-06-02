@@ -1,11 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/caesar_service.dart';
 import '../services/vigenere_service.dart';
 import '../services/aes_service.dart';
-import '../services/rsa_service.dart';
-import '../services/stats_service.dart'; // 📊 Statistika servisini import qildik
-import 'package:pointycastle/asymmetric/api.dart';
+import '../services/stats_service.dart';
 
 class DecryptScreen extends StatefulWidget {
   const DecryptScreen({super.key});
@@ -21,7 +20,7 @@ class _DecryptScreenState extends State<DecryptScreen> {
   String? _selectedAlgorithm;
   String _result = '';
 
-  final List<String> _algorithms = ['Caesar', 'Vigenère', 'AES', 'RSA'];
+  final List<String> _algorithms = ['Caesar', 'Vigenère', 'AES'];
 
   void _decrypt() async {
     final text = _inputController.text.trim();
@@ -29,7 +28,7 @@ class _DecryptScreenState extends State<DecryptScreen> {
 
     if (_selectedAlgorithm == null || text.isEmpty) {
       setState(() {
-        _result = '❗ Iltimos, matn va algoritmni tanlang.';
+        _result = tr('please_select_algorithm_and_text'); // ❗ Iltimos, matn va algoritmni tanlang.
       });
       return;
     }
@@ -40,45 +39,34 @@ class _DecryptScreenState extends State<DecryptScreen> {
       switch (_selectedAlgorithm) {
         case 'Caesar':
           if (key.isEmpty || int.tryParse(key) == null) {
-            output = '❗ Caesar uchun raqamli kalit kiriting.';
+            output = tr('enter_numeric_key_caesar'); // ❗ Caesar uchun raqamli kalit kiriting.
           } else {
             final shift = int.parse(key);
             output = CaesarCipher.decrypt(text, shift);
-            await StatsService.increment('caesar_count');// 📊 Statistikani yozish
+            await StatsService.increment('caesar_count');
           }
           break;
 
         case 'Vigenère':
           if (key.isEmpty) {
-            output = '❗ Vigenère uchun matnli kalit kiriting.';
+            output = tr('enter_text_key_vigenere'); // ❗ Vigenère uchun matnli kalit kiriting.
           } else {
             output = VigenereCipher.decrypt(text, key);
             await StatsService.increment('vigenere_count');
-
           }
           break;
 
         case 'AES':
           if (key.isEmpty) {
-            output = '❗ AES uchun matnli kalit kiriting.';
+            output = tr('enter_text_key_aes'); // ❗ AES uchun matnli kalit kiriting.
           } else {
             output = AESCipher.decrypt(text, key);
             await StatsService.increment('aes_count');
           }
           break;
 
-        case 'RSA':
-          if (key.isEmpty) {
-            output = '❗ RSA uchun private key (PEM formatda) kiriting.';
-          } else {
-            final privateKey = RSAService.parsePrivateKeyFromPem(key);
-            output = RSAService.decrypt(text, privateKey);
-            await StatsService.increment('rsa_count');
-          }
-          break;
-
         default:
-          output = '🔒 Bu algoritm hali qo‘llab-quvvatlanmaydi';
+          output = tr('algorithm_not_supported'); // 🔒 Bu algoritm hali qo‘llab-quvvatlanmaydi
       }
 
       setState(() {
@@ -86,7 +74,7 @@ class _DecryptScreenState extends State<DecryptScreen> {
       });
     } catch (e) {
       setState(() {
-        _result = '⚠️ Xatolik: ${e.toString()}';
+        _result = '${tr('error_occurred')} ${e.toString()}'; // ⚠️ Xatolik: ...
       });
     }
   }
@@ -96,9 +84,9 @@ class _DecryptScreenState extends State<DecryptScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
-          '🔓 Matnni Deshifrlash',
-          style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+        title: Text(
+          tr('decrypt_text_title'), // 🔓 Matnni Deshifrlash
+          style: const TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -131,7 +119,7 @@ class _DecryptScreenState extends State<DecryptScreen> {
                   controller: _inputController,
                   maxLines: 4,
                   style: const TextStyle(color: Colors.white),
-                  decoration: _inputStyle('📄 Shifrlangan matn'),
+                  decoration: _inputStyle(tr('encrypted_text_hint')), // 📄 Shifrlangan matn
                 ),
               ),
               const SizedBox(height: 16),
@@ -142,7 +130,7 @@ class _DecryptScreenState extends State<DecryptScreen> {
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                   icon: const Icon(Icons.arrow_drop_down, color: Colors.tealAccent),
                   decoration: InputDecoration(
-                    labelText: '📌 Deshifrlash algoritmi',
+                    labelText: tr('select_algorithm'), // 📌 Deshifrlash algoritmi
                     labelStyle: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w500),
                     enabledBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.tealAccent),
@@ -165,11 +153,8 @@ class _DecryptScreenState extends State<DecryptScreen> {
                         icon = Icons.vpn_key;
                         break;
                       case 'AES':
-                        icon = Icons.shield;
-                        break;
-                      case 'RSA':
                       default:
-                        icon = Icons.lock_outline;
+                        icon = Icons.shield;
                     }
                     return DropdownMenuItem(
                       value: algo,
@@ -195,13 +180,9 @@ class _DecryptScreenState extends State<DecryptScreen> {
                   child: _buildCard(
                     child: TextField(
                       controller: _keyController,
-                      maxLines: _selectedAlgorithm == 'RSA' ? 8 : 1,
+                      maxLines: 1,
                       style: const TextStyle(color: Colors.white),
-                      decoration: _inputStyle(
-                        _selectedAlgorithm == 'RSA'
-                            ? '🔑 RSA Private Key (PEM formatda)'
-                            : '🗝 Kalit (key)',
-                      ),
+                      decoration: _inputStyle(tr('key_hint')), // 🗝 Kalit (key)
                     ),
                   ),
                 ),
@@ -211,9 +192,9 @@ class _DecryptScreenState extends State<DecryptScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _decrypt,
                   icon: const Icon(Icons.lock_open, color: Colors.black),
-                  label: const Text(
-                    'Deshifrlash',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+                  label: Text(
+                    tr('decrypt_button'), // Deshifrlash
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -229,9 +210,9 @@ class _DecryptScreenState extends State<DecryptScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '✅ Deshifrlangan matn:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.tealAccent),
+                      Text(
+                        tr('decrypted_text_label'), // ✅ Deshifrlangan matn:
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.tealAccent),
                       ),
                       const SizedBox(height: 8),
                       SelectableText(
