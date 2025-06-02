@@ -21,10 +21,11 @@ android {
 
     defaultConfig {
         applicationId = "com.example.securecrypt_mobile_new_bmi"
-        minSdk = 21 // ⛳️ Oldingi 18 o‘rniga 21 qo‘ydik — NDK talabiga mos
+        minSdk = 21 // 🔐 FlutterSecureStorage ishlashi uchun KAMIDA 18 BO‘LSIN
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -36,6 +37,9 @@ android {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3") // ✅ FlutterSecureStorage uchun kerak
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.multidex:multidex:2.0.1")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
 
 flutter {
